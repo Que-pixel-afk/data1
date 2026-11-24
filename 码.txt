@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据新闻 · 可视化报道</title>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            color: #000000;
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.75;
+            padding: 40px 20px;
+        }
+
+        .page {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 56px;
+        }
+
+        /* 标题区 */
+        .header {
+            border-left: 5px solid #1a56db;
+            padding-left: 18px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 6px;
+        }
+
+        .header .sub {
+            font-size: 14px;
+            color: #555555;
+        }
+
+        /* 图表区块通用 */
+        .chart-block {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a56db;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 460px;
+            background: #ffffff;
+        }
+
+        /* 图片区块 */
+        .image-block {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .image-block img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+        }
+
+        .image-caption {
+            font-size: 13px;
+            color: #666666;
+            text-align: center;
+        }
+
+        /* 正文说明段落 */
+        .story-text {
+            font-size: 16px;
+            color: #000000;
+            text-indent: 2em;
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            body { padding: 20px 12px; }
+            .chart-container { height: 340px; }
+            .header h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+
+    <!-- 标题 -->
+    <div class="header">
+        <h1>数据新闻可视化报道</h1>
+        <div class="sub">基于 Word 文件表1、图1、图2的数据整理与呈现</div>
+    </div>
+
+    <!-- 引导文字（可替换为 Word 中的正文） -->
+    <p class="story-text">
+        以下内容基于原始 Word 文件中的表1、图1与图2整理。表1呈现为动态交互折线图，鼠标悬浮至数据点即可查看具体数值与占比；图1呈现为柱形图；图2以原图形式展示于同级目录下的 GIF 文件。
+    </p>
+
+    <!-- 表1 → 动态交互折线图 -->
+    <div class="chart-block">
+        <div class="chart-title">表1 · 动态折线图（悬浮查看数值与比例）</div>
+        <div id="lineChart" class="chart-container"></div>
+    </div>
+
+    <!-- 图1 → 柱形图 -->
+    <div class="chart-block">
+        <div class="chart-title">图1 · 柱形图</div>
+        <div id="barChart" class="chart-container"></div>
+    </div>
+
+    <!-- 图2 → 同级目录 31.gif -->
+    <div class="image-block">
+        <div class="chart-title">图2 · 动态可视化示意</div>
+        <!-- 同级目录直接写文件名即可 -->
+        <img src="31.gif" alt="图2 动态示意图">
+        <div class="image-caption">图2：31.gif（与 444.HTML 位于同一目录）</div>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================
+    // 1. 折线图配置（表1）
+    //    请将 xData / yData 替换为表1的真实数据
+    // ============================================================
+    var lineChart = echarts.init(document.getElementById('lineChart'));
+
+    // ---- 替换为表1的实际数据 ----
+    var xData = ['类别A', '类别B', '类别C', '类别D', '类别E', '类别F'];
+    var yData = [120, 200, 150, 80, 170, 230];
+    // 如果需要“比例”，请在此处计算每个点相对于总数的百分比
+    var total = yData.reduce(function (a, b) { return a + b; }, 0);
+
+    var lineOption = {
+        color: ['#1a56db'],                // 主蓝色
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: '#ffffff',
+            borderColor: '#1a56db',
+            borderWidth: 1,
+            textStyle: { color: '#000000', fontSize: 13 },
+            // 自定义提示框：同时显示“数值”和“比例”
+            formatter: function (params) {
+                var p = params[0];
+                var value = p.value;
+                var percent = total > 0 ? (value / total * 100).toFixed(1) : '0.0';
+                return (
+                    '<b>' + p.name + '</b><br/>' +
+                    '数值：' + value + '<br/>' +
+                    '比例：' + percent + '%'
+                );
+            }
+        },
+        grid: { left: '8%', right: '6%', top: '12%', bottom: '12%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: xData,
+            axisLine: { lineStyle: { color: '#9ca3af' } },
+            axisLabel: { color: '#000000', fontSize: 13 },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: '数值',
+            nameTextStyle: { color: '#374151', fontSize: 13 },
+            axisLine: { show: false },
+            axisLabel: { color: '#000000', fontSize: 13 },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } }
+        },
+        series: [{
+            name: '表1数据',
+            type: 'line',
+            smooth: true,                  // 平滑曲线，动态感更强
+            symbol: 'circle',
+            symbolSize: 10,                // 数据点清晰可见
+            showAllSymbol: true,           // 强制显示所有数据点
+            lineStyle: { width: 3, color: '#1a56db' },
+            itemStyle: {
+                color: '#1a56db',
+                borderColor: '#ffffff',
+                borderWidth: 2
+            },
+            areaStyle: {                   // 浅蓝色面积填充，突出主色调
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(26, 86, 219, 0.25)' },
+                        { offset: 1, color: 'rgba(26, 86, 219, 0.02)' }
+                    ]
+                }
+            },
+            data: yData,
+            // 在数据点上方显示数值（可选，如不需要可删去 label 整段）
+            label: {
+                show: false,               // 设为 true 可直接在点上显示数字
+                position: 'top',
+                color: '#1a56db',
+                fontWeight: 'bold',
+                fontSize: 12
+            }
+        }]
+    };
+
+    lineChart.setOption(lineOption);
+
+    // ============================================================
+    // 2. 柱形图配置（图1）
+    //    请将 barXData / barYData 替换为图1的真实数据
+    // ============================================================
+    var barChart = echarts.init(document.getElementById('barChart'));
+
+    // ---- 替换为图1的实际数据 ----
+    var barXData = ['项目一', '项目二', '项目三', '项目四', '项目五'];
+    var barYData = [320, 480, 260, 590, 410];
+
+    var barOption = {
+        color: ['#1a56db'],
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: '#ffffff',
+            borderColor: '#1a56db',
+            borderWidth: 1,
+            textStyle: { color: '#000000', fontSize: 13 },
+            formatter: function (params) {
+                var p = params[0];
+                return '<b>' + p.name + '</b><br/>数值：' + p.value;
+            }
+        },
+        grid: { left: '8%', right: '6%', top: '12%', bottom: '12%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: barXData,
+            axisLine: { lineStyle: { color: '#9ca3af' } },
+            axisLabel: { color: '#000000', fontSize: 13, interval: 0 },
+            axisTick: { show: false }
+        },
+        yAxis: {
+            type: 'value',
+            name: '数值',
+            nameTextStyle: { color: '#374151', fontSize: 13 },
+            axisLine: { show: false },
+            axisLabel: { color: '#000000', fontSize: 13 },
+            splitLine: { lineStyle: { color: '#e5e7eb', type: 'dashed' } }
+        },
+        series: [{
+            name: '图1数据',
+            type: 'bar',
+            barWidth: '50%',
+            itemStyle: {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: '#3b82f6' },
+                        { offset: 1, color: '#1a56db' }
+                    ]
+                },
+                borderRadius: [4, 4, 0, 0]   // 顶部圆角，视觉更柔和
+            },
+            data: barYData,
+            // 柱顶显示数值（如不需要可设为 false）
+            label: {
+                show: true,
+                position: 'top',
+                color: '#1a56db',
+                fontWeight: 'bold',
+                fontSize: 12
+            }
+        }]
+    };
+
+    barChart.setOption(barOption);
+
+    // ============================================================
+    // 3. 响应式：窗口大小变化时重绘
+    // ============================================================
+    window.addEventListener('resize', function () {
+        lineChart.resize();
+        barChart.resize();
+    });
+</script>
+
+</body>
+</html>
